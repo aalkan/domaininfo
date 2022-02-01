@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	"github.com/aalkan/domaininfo/pkg"
 	"github.com/manifoldco/promptui"
@@ -12,10 +13,21 @@ import (
 )
 
 func main() {
+	
 	defer func() {
-		fmt.Println("Program sonlandırılıyor...")
-
+		time.Sleep(time.Second * 1)
+		pkg.White("Program sonlandırılıyor...")
+		time.Sleep(time.Second * 1)
+		pkg.White("3...")
+		time.Sleep(time.Second * 1)
+		pkg.White("2...")
+		time.Sleep(time.Second * 1)
+		pkg.White("1...")
 	}()
+	pkg.Primary("Domain listesi dosya dizini: " + pkg.GetWr()+"/domains.txt")
+	time.Sleep(time.Second * 1)
+	fmt.Println("")
+	pkg.White("Yapmak istediğiniz işlemi seçiniz:")
 	prompt := promptui.Select{
 		Label: "Select Day",
 		Items: []string{"Çalıştır", "Temizle"},
@@ -24,7 +36,7 @@ func main() {
 	_, result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
+		pkg.Danger(fmt.Sprintf("Prompt failed %v\n", err))
 		return
 	}
 	switch result {
@@ -32,19 +44,22 @@ func main() {
 		workDirectory := pkg.GetWr()
 		filename := workDirectory + "/domains.txt"
 		if err := pkg.CheckFileExists(filename); err != nil {
-			fmt.Println(err.Error())
+			pkg.Danger(err.Error())
 			return
 		}
 
+		pkg.Success("Excel dosyası okunuyor...")
+		time.Sleep(time.Second * 1)
+
 		fileByte, err := ioutil.ReadFile(filename)
 		if err != nil {
-			fmt.Println("domains.txt okunurken hata meydana geldi..")
+			pkg.Danger("domains.txt okunurken hata meydana geldi..")
 			return
 		}
 		domains := strings.Split(string(fileByte), "\n")
 
 		if len(domains) == 0 {
-			fmt.Println("Yeterli veri okunamadı...")
+			pkg.Danger("Yeterli veri okunamadı...")
 			return
 		}
 
@@ -74,6 +89,8 @@ func main() {
 		// Set active sheet of the workbook.
 		f.SetActiveSheet(index)
 		// Save spreadsheet by the given path.
+		pkg.Success("Dosyaya yazılıyor..")
+		time.Sleep(time.Second * 2)
 
 		for i, domain := range domains {
 			result, _ := whois.GetWhois(domain)
@@ -110,7 +127,12 @@ func main() {
 
 		randomName := pkg.GetWr() + "/" + "results.xlsx"
 		if err := f.SaveAs(randomName); err != nil {
-			fmt.Println(err.Error() + " Dosya kayıt edilemedi")
+			pkg.Danger(err.Error() + " Dosya kayıt edilemedi")
 		}
+		
+		
+		pkg.Success("İşlem başarılı...")
+	
+
 	}
 }
